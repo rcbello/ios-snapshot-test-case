@@ -170,6 +170,21 @@
                         error:(NSError **)errorPtr;
 
 /**
+ Performs the comparison or records a snapshot of the element if recordMode is YES.
+ @param element The element to snapshot
+ @param referenceImagesDirectory The directory in which reference images are stored.
+ @param identifier An optional identifier, used if there are multiple snapshot tests in a given -test method.
+ @param tolerance The percentage difference to still count as identical - 0 mean pixel perfect, 1 means I don't care
+ @param errorPtr An error to log in an XCTAssert() macro if the method fails (missing reference image, images differ, etc).
+ @returns YES if the comparison (or saving of the reference image) succeeded.
+ */
+- (BOOL)compareSnapshotOfElement:(XCUIElement *)element
+        referenceImagesDirectory:(NSString *)referenceImagesDirectory
+                      identifier:(NSString *)identifier
+                       tolerance:(CGFloat)tolerance
+                           error:(NSError **)errorPtr;
+
+/**
  Checks if reference image with identifier based name exists in the reference images directory.
  @param referenceImagesDirectory The directory in which reference images are stored.
  @param identifier An optional identifier, used if there are multiple snapshot tests in a given -test method.

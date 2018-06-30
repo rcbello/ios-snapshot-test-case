@@ -9,6 +9,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <XCTest/XCTest.h>
 
 #import <FBSnapshotTestCase/FBSnapshotTestCasePlatform.h>
 
@@ -65,11 +66,11 @@ extern NSString *const FBDiffedImageKey;
 
 /**
  When set, allows fine-grained control over how agnostic you want the file names to be.
-
+ 
  Allows you to combine which agnostic options you want in your snapshot file names.
-
+ 
  The default value is FBSnapshotTestCaseAgnosticOptionNone.
-
+ 
  @attention If deviceAgnostic is YES, this bitmask is ignored. deviceAgnostic will be deprecated in a future version of FBSnapshotTestCase.
  */
 @property (readwrite, nonatomic, assign) FBSnapshotTestCaseAgnosticOption agnosticOptions;
@@ -137,6 +138,21 @@ extern NSString *const FBDiffedImageKey;
                           identifier:(NSString *)identifier
                            tolerance:(CGFloat)tolerance
                                error:(NSError **)errorPtr;
+
+/**
+ Performs the comparison of an XCUIElement.
+ @param element The XCUIElement to snapshot.
+ @param selector The test method being run.
+ @param identifier An optional identifier, used is there are muliptle snapshot tests in a given -test method.
+ @param tolerance The percentage of pixels that can differ and still be considered 'identical'
+ @param errorPtr An error to log in an XCTAssert() macro if the method fails (missing reference image, images differ, etc).
+ @returns YES if the comparison (or saving of the reference image) succeeded.
+ */
+- (BOOL)compareSnapshotOfElement:(XCUIElement *)element
+                        selector:(SEL)selector
+                      identifier:(NSString *)identifier
+                       tolerance:(CGFloat)tolerance
+                           error:(NSError **)errorPtr;
 
 /**
  Loads a reference image.

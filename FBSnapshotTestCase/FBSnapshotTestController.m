@@ -99,6 +99,18 @@ typedef NS_ENUM(NSUInteger, FBTestSnapshotFileNameType) {
   }
 }
 
+- (BOOL)compareSnapshotOfElement:(XCUIElement *)element
+                        selector:(SEL)selector
+                      identifier:(NSString *)identifier
+                       tolerance:(CGFloat)tolerance
+                           error:(NSError **)errorPtr {
+  if (self.recordMode) {
+    return [self _recordSnapshotOfElement:element selector:selector identifier:identifier error:errorPtr];
+  } else {
+    return [self _performPixelComparisonWithElement:element selector:selector identifier:identifier tolerance:tolerance error:errorPtr];
+  }
+}
+
 - (UIImage *)referenceImageForSelector:(SEL)selector
                             identifier:(NSString *)identifier
                                  error:(NSError **)errorPtr
@@ -295,12 +307,42 @@ typedef NS_ENUM(NSUInteger, FBTestSnapshotFileNameType) {
   return NO;
 }
 
+- (BOOL)_performPixelComparisonWithElement:(XCUIElement *)element
+                                  selector:(SEL)selector
+                                identifier:(NSString *)identifier
+                                 tolerance:(CGFloat)tolerance
+                                     error:(NSError **)errorPtr
+{
+  UIImage *referenceImage = [self referenceImageForSelector:selector identifier:identifier error:errorPtr];
+  if (nil != referenceImage) {
+    UIImage *snapshot = element.screenshot.image;
+    BOOL imagesSame = [self compareReferenceImage:referenceImage toImage:snapshot tolerance:tolerance error:errorPtr];
+    if (!imagesSame) {
+      NSError *saveError = nil;
+      if ([self saveFailedReferenceImage:referenceImage testImage:snapshot selector:selector identifier:identifier error:&saveError] == NO) {
+        NSLog(@"Error saving test images: %@", saveError);
+      }
+    }
+    return imagesSame;
+  }
+  return NO;
+}
+
 - (BOOL)_recordSnapshotOfViewOrLayer:(id)viewOrLayer
                             selector:(SEL)selector
                           identifier:(NSString *)identifier
                                error:(NSError **)errorPtr
 {
   UIImage *snapshot = [self _imageForViewOrLayer:viewOrLayer];
+  return [self _saveReferenceImage:snapshot selector:selector identifier:identifier error:errorPtr];
+}
+
+- (BOOL)_recordSnapshotOfElement:(XCUIElement *)element
+                        selector:(SEL)selector
+                      identifier:(NSString *)identifier
+                           error:(NSError **)errorPtr
+{
+  UIImage *snapshot = element.screenshot.image;
   return [self _saveReferenceImage:snapshot selector:selector identifier:identifier error:errorPtr];
 }
 

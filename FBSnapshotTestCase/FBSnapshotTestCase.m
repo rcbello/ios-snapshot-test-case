@@ -158,6 +158,15 @@
                                        error:errorPtr];
 }
 
+- (BOOL)compareSnapshotOfElement:(XCUIElement *)element referenceImagesDirectory:(NSString *)referenceImagesDirectory identifier:(NSString *)identifier tolerance:(CGFloat)tolerance error:(NSError *__autoreleasing *)errorPtr {
+  _snapshotController.referenceImagesDirectory = referenceImagesDirectory;
+  return [_snapshotController compareSnapshotOfElement: element
+                                              selector:self.invocation.selector
+                                            identifier:identifier
+                                             tolerance:tolerance
+                                                 error:errorPtr];
+}
+
 - (BOOL)referenceImageRecordedInDirectory:(NSString *)referenceImagesDirectory
                                identifier:(NSString *)identifier
                                     error:(NSError **)errorPtr

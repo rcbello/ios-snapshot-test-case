@@ -56,6 +56,35 @@
         XCTFail("Missing value for referenceImagesDirectory - Set FB_REFERENCE_IMAGE_DIR as Environment variable in your scheme.")
       }
     }
+    
+    func FBSnapshotVerifyElement(_ element: XCUIElement, identifier: String = "", suffixes: NSOrderedSet = FBSnapshotTestCaseDefaultSuffixes(), tolerance: CGFloat = 0, file: StaticString = #file, line: UInt = #line) {
+      let envReferenceImageDirectory = self.getReferenceImageDirectory(withDefault: FB_REFERENCE_IMAGE_DIR)
+      var error: NSError?
+      var comparisonSuccess = false
+      
+      if let envReferenceImageDirectory = envReferenceImageDirectory {
+        for suffix in suffixes {
+          let referenceImagesDirectory = "\(envReferenceImageDirectory)\(suffix)"
+          do {
+            try compareSnapshot(of: element, referenceImagesDirectory: referenceImagesDirectory, identifier: identifier, tolerance: tolerance)
+            comparisonSuccess = true
+          } catch let error1 as NSError {
+            error = error1
+            comparisonSuccess = false
+          }
+          
+          assert(recordMode == false, message: "Test ran in record mode. Reference image is now saved. Disable record mode to perform an actual snapshot comparison!", file: file, line: line)
+          
+          if comparisonSuccess || recordMode {
+            break
+          }
+          
+          assert(comparisonSuccess, message: "Snapshot comparison failed: \(String(describing: error))", file: file, line: line)
+        }
+      } else {
+        XCTFail("Missing value for referenceImagesDirectory - Set FB_REFERENCE_IMAGE_DIR as Environment variable in your scheme.")
+      }
+    }
 
     func assert(_ assertion: Bool, message: String, file: StaticString, line: UInt) {
       if !assertion {
